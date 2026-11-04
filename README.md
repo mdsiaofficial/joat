@@ -5,21 +5,20 @@ common runtimes, compilers, web servers, and databases. One image, zero setup.
 
 ## Included Versions
 
-| Category        | Tool          | Version |
-|-----------------|---------------|---------|
-| Runtime         | Node.js       | 26      |
-| Runtime         | .NET SDK      | 10.0    |
-| Runtime         | Java (OpenJDK)| 25      |
-| Runtime         | Python        | 3.13    |
-| Runtime         | Bun           | 1.4.4   |
-| Runtime         | Rust          | 1.99.0  |
-| Compiler        | GCC           | 16      |
-| Compiler        | G++           | 16      |
-| Web Server      | Nginx         | 1.31    |
-| Database        | MongoDB       | 9.0     |
-| Database        | PostgreSQL    | 18.6    |
-| Database        | SQLite        | 3.54    |
-| Cache / Store   | Redis         | 8.10    |
+| Category        | Tool          | Provider          | Version |
+|-----------------|---------------|-------------------|---------|
+| Runtime         | Node.js       | NodeSource        | 26      |
+| Runtime         | .NET SDK      | Microsoft         | 10.0    |
+| Runtime         | Java          | SDKMAN (Temurin)  | 25      |
+| Runtime         | Python        | APT (Debian)      | 3.13    |
+| Runtime         | Bun           | Bun               | 1.4.4   |
+| Runtime         | Rust          | rustup            | 1.99.0  |
+| Compiler        | GCC           | APT (Debian sid)  | 16      |
+| Compiler        | G++           | APT (Debian sid)  | 16      |
+| Web Server      | Nginx         | Nginx             | 1.31    |
+| Database        | PostgreSQL    | PGDG              | 18.6    |
+| Database        | SQLite        | APT (Debian)      | 3.54    |
+| Cache / Store   | Redis         | APT (Debian)      | 8.0.2   |
 
 ## Usage
 
@@ -107,5 +106,6 @@ To build for multiple platforms locally (requires QEMU):
 ```sh
 docker run --privileged --rm tonistiigi/binfmt --install all
 docker buildx create --name multiarch --use
-docker buildx build --platform linux/amd64,linux/arm64 -t joat:local .
+docker buildx build --platform linux/amd64,linux/arm64 -t mdsiaofficial/joat:latest .
+
 ```

@@ -83,23 +83,8 @@ RUN sh -c 'echo "deb [signed-by=/usr/share/keyrings/postgresql-archive-keyring.g
     && apt-get update && apt-get install -y postgresql-18 \
     && rm -rf /var/lib/apt/lists/*
 
-# 11. Install MySQL 9.7 LTS from the official multi-arch image 
-# ! IN DEBIAN TRIXIE - THERE IS NO MYSQL DATABASE. INSTEAD THEY HAVE MARIADB. 
-
-# 12. Install Redis 8.10 from source
-RUN apt-get update && apt-get install -y build-essential tcl \
-    && wget https://github.com/redis/redis/archive/refs/tags/8.10.2.tar.gz \
-    && tar -xzf 8.10.2.tar.gz \
-    && cd redis-8.10.2 \
-    && make \
-    && make install \
-    && cd .. \
-    && rm -rf redis-8.10.2 8.10.2.tar.gz
-
-# 13. Install MongoDB 9.0 from the official MongoDB repository
-RUN curl -fsSL https://pgp.mongodb.com/server-9.asc | gpg --dearmor -o /usr/share/keyrings/mongodb-server-9.gpg \
-    && echo "deb [ signed-by=/usr/share/keyrings/mongodb-server-9.gpg ] https://repo.mongodb.org/apt/debian trixie/mongodb-org/9.0 main" | tee /etc/apt/sources.list.d/mongodb-org-9.0.list \
-    && apt-get update && apt-get install -y mongodb-org \
+# 11. Install Redis 8.0.2 from Debian Trixie apt (not from source)
+RUN apt-get update && apt-get install -y redis-server redis-tools \
     && rm -rf /var/lib/apt/lists/*
 
 # Build args for multi-platform (buildx) support are already defined at the top of the stage.
