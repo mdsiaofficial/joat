@@ -18,7 +18,7 @@ common runtimes, compilers, web servers, and databases. One image, zero setup.
 | Web Server      | Nginx         | 1.31    |
 | Database        | MongoDB       | 9.0     |
 | Database        | PostgreSQL    | 18.6    |
-| Database        | MySQL         | 9.7 LTS |
+| Database        | MySQL         | 8.4 LTS |
 | Database        | SQLite        | 3.54    |
 | Cache / Store   | Redis         | 8.10    |
 
