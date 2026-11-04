@@ -25,4 +25,5 @@ common runtimes, compilers, web servers, and databases. One image, zero setup.
 ## Usage
 
 ```bash
-docker run -it --rm your_dockerhub_username/joat:latest
+docker run -it --rm mdsiaofficial/joat
+

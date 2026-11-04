@@ -4,54 +4,116 @@ FROM debian:trixie
 # Prevent interactive prompts during installation
 ENV DEBIAN_FRONTEND=noninteractive
 
-# 1. Install base system tools, GCC 16, G++ 16, Python 3.15, SQLite 3.54, Nginx 1.31
+# 1. Install essential build tools and core utilities
 RUN apt-get update && apt-get install -y \
-    curl wget git unzip build-essential ca-certificates gnupg lsb-release \
-    gcc-16 g++-16 \
-    python3.15 python3-pip python3.15-venv \
+    curl wget git unzip zip build-essential ca-certificates gnupg lsb-release \
     sqlite3 \
-    nginx \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Install Node.js 26 (using NodeSource repository)
+# 2. Install GCC 16 and G++ 16 from the Debian unstable (sid) repository
+# This is necessary because they are not in the stable Trixie repo.
+RUN echo "deb http://deb.debian.org/debian sid main" > /etc/apt/sources.list.d/sid.list \
+    && apt-get update \
+    && apt-get install -y gcc-16 g++-16 \
+    && rm -f /etc/apt/sources.list.d/sid.list \
+    && rm -rf /var/lib/apt/lists/*
+
+# 3. Install Python 3.15 from source
+# First, install the required build dependencies.
+RUN apt-get update && apt-get install -y \
+    build-essential pkg-config wget ca-certificates xz-utils \
+    libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev \
+    libffi-dev liblzma-dev libncursesw5-dev libgdbm-dev libgdbm-compat-dev \
+    uuid-dev tk-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Then, download, compile, and install Python 3.15.2.
+RUN wget https://www.python.org/ftp/python/3.15.2/Python-3.15.2.tar.xz \
+    && tar -xf Python-3.15.2.tar.xz \
+    && cd Python-3.15.2 \
+    && ./configure --prefix=/usr/local \
+    && make -j$(nproc) \
+    && make altinstall \
+    && rm -rf ../Python-3.15.2 ../Python-3.15.2.tar.xz
+
+# 4. Install Node.js 26 (using NodeSource repository)
 RUN curl -fsSL https://deb.nodesource.com/setup_26.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# 3. Install Bun 1.4.4 (official installer)
+# 5. Install Bun (official installer)
 RUN curl -fsSL https://bun.com/install | bash \
     && mv /root/.bun/bin/bun /usr/local/bin/bun
 
-# 4. Install Rust 1.99.0 (via rustup)
+# 6. Install Rust 1.99 (via rustup)
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.99.0
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-# 5. Install Java 25 (OpenJDK 25 from Debian repos)
-RUN apt-get update && apt-get install -y openjdk-25-jdk \
+# 7. Install Java 25 (via SDKMAN, Temurin — not in Debian Trixie repos)
+RUN apt-get update && apt-get install -y zip \
+    && rm -rf /var/lib/apt/lists/* \
+    && curl -s https://get.sdkman.io | bash \
+    && bash -c 'source "$HOME/.sdkman/bin/sdkman-init.sh" && { sdk install java 25.0.1-tem || sdk install java 25-tem; } && sdk install maven && sdk install gradle'
+ENV JAVA_HOME="/root/.sdkman/candidates/java/current"
+ENV M2_HOME="/root/.sdkman/candidates/maven/current"
+ENV GRADLE_HOME="/root/.sdkman/candidates/gradle/current"
+ENV PATH="${JAVA_HOME}/bin:${M2_HOME}/bin:${GRADLE_HOME}/bin:${PATH}"
+
+# 8. Install .NET SDK 10.0 (via dotnet-install.sh — not Debian repos)
+RUN apt-get update && apt-get install -y libicu-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    && wget https://dot.net/v1/dotnet-install.sh -O /tmp/dotnet-install.sh \
+    && chmod +x /tmp/dotnet-install.sh \
+    && /tmp/dotnet-install.sh --channel 10.0 \
+    && rm -f /tmp/dotnet-install.sh
+ENV DOTNET_ROOT="/root/.dotnet"
+ENV PATH="/root/.dotnet:${PATH}"
+
+# 9. Install Nginx 1.31 from the official Nginx repository
+RUN echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/mainline/debian/ trixie nginx" | tee /etc/apt/sources.list.d/nginx.list \
+    && curl -fsSL https://nginx.org/keys/nginx_signing.key | gpg --dearmor -o /usr/share/keyrings/nginx-archive-keyring.gpg \
+    && apt-get update && apt-get install -y nginx \
     && rm -rf /var/lib/apt/lists/*
 
-# 6. Install .NET SDK 10.0 (Microsoft package repository)
-RUN wget https://packages.microsoft.com/config/debian/13/packages-microsoft-prod.deb -O packages-microsoft-prod.deb \
-    && dpkg -i packages-microsoft-prod.deb \
-    && rm packages-microsoft-prod.deb \
-    && apt-get update && apt-get install -y dotnet-sdk-10.0 \
+# 10. Install PostgreSQL 18.6 from the official PGDG repository
+RUN sh -c 'echo "deb [signed-by=/usr/share/keyrings/postgresql-archive-keyring.gpg] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list' \
+    && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql-archive-keyring.gpg \
+    && apt-get update && apt-get install -y postgresql-18 \
     && rm -rf /var/lib/apt/lists/*
 
-# 7. Install PostgreSQL 18.6 and Redis 8.10 (from Debian repos)
-RUN apt-get update && apt-get install -y postgresql-18 redis-server \
-    && rm -rf /var/lib/apt/lists/*
-
-# 8. Install MySQL 9.7 LTS (from Oracle's official APT repository)
-RUN curl -fsSL https://repo.mysql.com/RPM-GPG-KEY-mysql-2023 | gpg --dearmor -o /usr/share/keyrings/mysql.gpg \
+# 11. Install MySQL 9.7 LTS from Oracle's official repository
+RUN curl -fsSL https://repo.mysql.com/RPM-GPG-KEY-mysql-2025 | gpg --dearmor -o /usr/share/keyrings/mysql.gpg \
     && echo "deb [signed-by=/usr/share/keyrings/mysql.gpg] http://repo.mysql.com/apt/debian/ trixie mysql-9.7-lts" | tee /etc/apt/sources.list.d/mysql.list \
     && apt-get update && apt-get install -y mysql-server \
     && rm -rf /var/lib/apt/lists/*
 
-# 9. Install MongoDB 9.0 (Community Edition from official repo)
-RUN curl -fsSL https://www.mongodb.org/static/pgp/server-9.0.asc | gpg --dearmor -o /usr/share/keyrings/mongodb-server-9.0.gpg \
-    && echo "deb [ signed-by=/usr/share/keyrings/mongodb-server-9.0.gpg ] http://repo.mongodb.org/apt/debian trixie/mongodb-org/9.0 main" | tee /etc/apt/sources.list.d/mongodb-org-9.0.list \
+# 12. Install Redis 8.10 from source
+RUN apt-get update && apt-get install -y build-essential tcl \
+    && wget https://github.com/redis/redis/archive/refs/tags/8.10.2.tar.gz \
+    && tar -xzf 8.10.2.tar.gz \
+    && cd redis-8.10.2 \
+    && make \
+    && make install \
+    && cd .. \
+    && rm -rf redis-8.10.2 8.10.2.tar.gz
+
+# 13. Install MongoDB 9.0 from the official MongoDB repository
+RUN curl -fsSL https://pgp.mongodb.com/server-9.asc | gpg --dearmor -o /usr/share/keyrings/mongodb-server-9.gpg \
+    && echo "deb [ signed-by=/usr/share/keyrings/mongodb-server-9.gpg ] https://repo.mongodb.org/apt/debian trixie/mongodb-org/9.0 main" | tee /etc/apt/sources.list.d/mongodb-org-9.0.list \
     && apt-get update && apt-get install -y mongodb-org \
     && rm -rf /var/lib/apt/lists/*
+
+# Add version/traceability labels (populated by CI via build-args)
+ARG VERSION=dev
+ARG GIT_COMMIT=unknown
+ARG BUILD_DATE=unknown
+
+LABEL org.opencontainers.image.title="joat" \
+      org.opencontainers.image.description="Jack Of All Trades development environment image" \
+      org.opencontainers.image.version="${VERSION}" \
+      org.opencontainers.image.revision="${GIT_COMMIT}" \
+      org.opencontainers.image.created="${BUILD_DATE}" \
+      org.opencontainers.image.source="https://github.com/mdsiaofficial/joat"
 
 # Set working directory
 WORKDIR /app
