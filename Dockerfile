@@ -103,7 +103,9 @@ RUN curl -fsSL https://pgp.mongodb.com/server-9.asc | gpg --dearmor -o /usr/shar
     && apt-get update && apt-get install -y mongodb-org \
     && rm -rf /var/lib/apt/lists/*
 
-# Add version/traceability labels (populated by CI via build-args)
+# Build args for multi-platform (buildx) support
+ARG TARGETPLATFORM
+ARG TARGETARCH
 ARG VERSION=dev
 ARG GIT_COMMIT=unknown
 ARG BUILD_DATE=unknown
@@ -120,3 +122,8 @@ WORKDIR /app
 
 # Default command (keeps container running for interactive use)
 CMD ["/bin/bash"]
+
+# Build with:
+#   docker buildx build --platform linux/amd64,linux/arm64 -t mdsiaofficial/joat:1.0.0 --push .
+# Run on Apple Silicon (ARM64) natively:
+#   docker run -it mdsiaofficial/joat:1.0.0
