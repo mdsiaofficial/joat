@@ -1,7 +1,3 @@
-# ---- MySQL source stage (multi-arch) ----
-ARG MYSQL_VERSION=9.7
-FROM mysql:${MYSQL_VERSION} AS mysql-source
-
 # Use the latest stable Debian (Trixie)
 FROM debian:trixie
 
@@ -29,7 +25,7 @@ RUN echo "deb http://deb.debian.org/debian sid main" > /etc/apt/sources.list.d/s
     && rm -f /etc/apt/sources.list.d/sid.list \
     && rm -rf /var/lib/apt/lists/*
 
-# 3. Install Python 3.15 from source
+# 3. Install Python 3.13 from Debian's official repositories
 # First, install the required build dependencies.
 RUN apt-get update && apt-get install -y \
     build-essential pkg-config wget ca-certificates xz-utils \
@@ -38,14 +34,9 @@ RUN apt-get update && apt-get install -y \
     uuid-dev tk-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Then, download, compile, and install Python 3.15.2.
-RUN wget https://www.python.org/ftp/python/3.15.2/Python-3.15.2.tar.xz \
-    && tar -xf Python-3.15.2.tar.xz \
-    && cd Python-3.15.2 \
-    && ./configure --prefix=/usr/local \
-    && make -j$(nproc) \
-    && make altinstall \
-    && rm -rf ../Python-3.15.2 ../Python-3.15.2.tar.xz
+RUN apt-get update && apt-get install -y \
+    python3 python3-pip python3-venv python3-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # 4. Install Node.js 26 (using NodeSource repository)
 RUN curl -fsSL https://deb.nodesource.com/setup_26.x | bash - \
@@ -92,33 +83,8 @@ RUN sh -c 'echo "deb [signed-by=/usr/share/keyrings/postgresql-archive-keyring.g
     && apt-get update && apt-get install -y postgresql-18 \
     && rm -rf /var/lib/apt/lists/*
 
-# 11. Install MySQL 9.7 LTS from the official multi-arch image
-# Copy the MySQL server, client tools, and supporting files from the official image.
-COPY --from=mysql-source /usr/sbin/mysqld /usr/sbin/mysqld
-COPY --from=mysql-source /usr/bin/mysql /usr/bin/mysql
-COPY --from=mysql-source /usr/bin/mysqladmin /usr/bin/mysqladmin
-COPY --from=mysql-source /usr/bin/mysqldump /usr/bin/mysqldump
-
-# Copy shared libraries required by the MySQL binaries.
-# The paths differ by architecture, so we use TARGETARCH to select the correct source.
-COPY --from=mysql-source /usr/lib64/mysql/ /usr/lib/mysql/
-COPY --from=mysql-source /usr/lib64/libssl.so.3 /usr/lib/${TARGETARCH}-linux-gnu/
-COPY --from=mysql-source /usr/lib64/libcrypto.so.3 /usr/lib/${TARGETARCH}-linux-gnu/
-COPY --from=mysql-source /usr/lib64/libncurses.so.6 /usr/lib/${TARGETARCH}-linux-gnu/
-COPY --from=mysql-source /usr/lib64/libtinfo.so.6 /usr/lib/${TARGETARCH}-linux-gnu/
-
-# Copy the official entrypoint script (used for initializing the data directory).
-COPY --from=mysql-source /usr/local/bin/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-
-# Create the mysql user and group, and set up the data directory and runtime directories.
-RUN groupadd -r mysql && useradd -r -g mysql mysql \
-    && mkdir -p /var/lib/mysql /var/run/mysqld \
-    && chown -R mysql:mysql /var/lib/mysql /var/run/mysqld \
-    && chmod 777 /var/run/mysqld
-
-# Expose the default MySQL port.
-EXPOSE 3306
+# 11. Install MySQL 9.7 LTS from the official multi-arch image 
+# ! IN DEBIAN TRIXIE - THERE IS NO MYSQL DATABASE. INSTEAD THEY HAVE MARIADB. 
 
 # 12. Install Redis 8.10 from source
 RUN apt-get update && apt-get install -y build-essential tcl \
@@ -152,6 +118,6 @@ WORKDIR /app
 CMD ["/bin/bash"]
 
 # Build with:
-#   docker buildx build --platform linux/amd64,linux/arm64 -t mdsiaofficial/joat:1.0.0 --push .
+#   docker buildx build --platform linux/amd64,linux/arm64 -t mdsiaofficial/joat:1.x.x --push .
 # Run on Apple Silicon (ARM64) natively:
-#   docker run -it mdsiaofficial/joat:1.0.0
+#   docker run -it mdsiaofficial/joat:1.x.x

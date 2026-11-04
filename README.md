@@ -10,7 +10,7 @@ common runtimes, compilers, web servers, and databases. One image, zero setup.
 | Runtime         | Node.js       | 26      |
 | Runtime         | .NET SDK      | 10.0    |
 | Runtime         | Java (OpenJDK)| 25      |
-| Runtime         | Python        | 3.15    |
+| Runtime         | Python        | 3.13    |
 | Runtime         | Bun           | 1.4.4   |
 | Runtime         | Rust          | 1.99.0  |
 | Compiler        | GCC           | 16      |
@@ -18,7 +18,6 @@ common runtimes, compilers, web servers, and databases. One image, zero setup.
 | Web Server      | Nginx         | 1.31    |
 | Database        | MongoDB       | 9.0     |
 | Database        | PostgreSQL    | 18.6    |
-| Database        | MySQL         | 8.4 LTS |
 | Database        | SQLite        | 3.54    |
 | Cache / Store   | Redis         | 8.10    |
 
