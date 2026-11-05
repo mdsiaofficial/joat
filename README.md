@@ -48,11 +48,11 @@ git commit -m "feat: describe your changes here"
 
 ### 3. Create and push a version tag
 
-GitHub Actions triggers on version tags (e.g., `v1.0.0`, `v1.0.1`).
+GitHub Actions triggers on version tags (e.g., `v1.0.0`, `v1.0.1`, `v1.3.1`).
 
 ```sh
-git tag v1.0.0
-git push origin v1.0.0
+git tag v1.x.x
+git push origin v1.x.x
 ```
 
 You can also push to `main` to trigger a build with the `latest` tag:
@@ -75,8 +75,8 @@ When you push a tag, the CI pipeline (`.github/workflows/docker-publish.yml`):
 After the workflow completes, users can run:
 
 ```sh
-docker pull mdsiaofficial/joat:v1.0.0
-docker run -it --rm mdsiaofficial/joat:v1.0.0
+docker pull mdsiaofficial/joat:latest
+docker run -it --rm mdsiaofficial/joat:latest
 ```
 
 ### Required GitHub Secrets
@@ -95,10 +95,10 @@ If you want to build and test the image locally before pushing:
 
 ```sh
 # Build for your current platform only
-docker build -t joat:local .
+docker build -t mdsiaofficial/joat:latest .
 
 # Run it
-docker run -it --rm joat:local
+docker run -it --rm mdsiaofficial/joat:latest
 ```
 
 To build for multiple platforms locally (requires QEMU):
