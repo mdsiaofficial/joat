@@ -61,12 +61,12 @@ ENV M2_HOME="/root/.sdkman/candidates/maven/current"
 ENV GRADLE_HOME="/root/.sdkman/candidates/gradle/current"
 ENV PATH="${JAVA_HOME}/bin:${M2_HOME}/bin:${GRADLE_HOME}/bin:${PATH}"
 
-# 8. Install .NET SDK 10.0 (via dotnet-install.sh — not Debian repos)
+# 8. Install .NET SDK 11.0 (via dotnet-install.sh — not Debian repos)
 RUN apt-get update && apt-get install -y libicu-dev \
     && rm -rf /var/lib/apt/lists/* \
     && wget https://dot.net/v1/dotnet-install.sh -O /tmp/dotnet-install.sh \
     && chmod +x /tmp/dotnet-install.sh \
-    && /tmp/dotnet-install.sh --channel 10.0 \
+    && /tmp/dotnet-install.sh --channel 11.0 \
     && rm -f /tmp/dotnet-install.sh
 ENV DOTNET_ROOT="/root/.dotnet"
 ENV PATH="/root/.dotnet:${PATH}"

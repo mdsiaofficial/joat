@@ -1,4 +1,4 @@
-# JOAT — Jack of All Trades
+# JOAT — Jack of All Trades (current_version: 1.0.4)
 
 A single Debian Trixie–based Docker image bundling the latest versions of the most
 common runtimes, compilers, web servers, and databases. One image, zero setup.
@@ -8,7 +8,7 @@ common runtimes, compilers, web servers, and databases. One image, zero setup.
 | Category        | Tool          | Provider          | Version |
 |-----------------|---------------|-------------------|---------|
 | Runtime         | Node.js       | NodeSource        | 26      |
-| Runtime         | .NET SDK      | Microsoft         | 10.0    |
+| Runtime         | .NET SDK      | Microsoft         | 11.0    |
 | Runtime         | Java          | SDKMAN (Temurin)  | 25      |
 | Runtime         | Python        | APT (Debian)      | 3.13    |
 | Runtime         | Bun           | Bun               | 1.4.4   |
