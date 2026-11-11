@@ -5,20 +5,20 @@ common runtimes, compilers, web servers, and databases. One image, zero setup.
 
 ## Included Versions
 
-| Category        | Tool          | Provider          | Version |
-|-----------------|---------------|-------------------|---------|
-| Runtime         | Node.js       | NodeSource        | 26      |
-| Runtime         | .NET SDK      | Microsoft         | 11.0    |
-| Runtime         | Java          | SDKMAN (Temurin)  | 25      |
-| Runtime         | Python        | APT (Debian)      | 3.13    |
-| Runtime         | Bun           | Bun               | 1.4.4   |
-| Runtime         | Rust          | rustup            | 1.99.0  |
-| Compiler        | GCC           | APT (Debian sid)  | 16      |
-| Compiler        | G++           | APT (Debian sid)  | 16      |
-| Web Server      | Nginx         | Nginx             | 1.31    |
-| Database        | PostgreSQL    | PGDG              | 18.6    |
-| Database        | SQLite        | APT (Debian)      | 3.54    |
-| Cache / Store   | Redis         | APT (Debian)      | 8.0.2   |
+| Category        | Tool          | Provider          | Version | Docker Image | Alternative Docker Image |
+|-----------------|---------------|-------------------|---------|--------------|-|
+| Runtime         | Node.js       | NodeSource        | 26      | node:26.13.0-trixie | |
+| Runtime         | .NET SDK      | Microsoft         | 11.0    | mcr.microsoft.com/dotnet/sdk:11.0 | |
+| Runtime         | Java          | SDKMAN (Temurin)  | 25      | sourcemation/jdk-25:latest | |
+| Runtime         | Python        | APT (Debian)      | 3.13    | python:3.13-trixie | |
+| Runtime         | Bun           | Bun               | 1.4.4   | oven/bun:1.4.4 | |
+| Runtime         | Rust          | rustup            | 1.99.0  | rust:1.99-trixie | |
+| Compiler        | GCC           | APT (Debian sid)  | 16      | gcc:16.2-trixie | |
+| Compiler        | G++           | APT (Debian sid)  | 16      | gcc:16.2-trixie | |
+| Web Server      | Nginx         | Nginx             | 1.31    | nginx:1.31.8-trixie | |
+| Database        | PostgreSQL    | PGDG              | 18.6    | postgres:18.6-trixie | dockette/adminer |
+| Database        | SQLite        | APT (Debian)      | 3.54    | keinos/sqlite3:3.54.1 | dockette/adminer |
+| Cache / Store   | Redis         | APT (Debian)      | 8.0.2   | redis:8.0.2-bookworm | |
 
 ## Usage
 
